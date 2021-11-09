@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import ImageGallery from "./imageGallery/ImageGallery";
 import Searchbar from "./searchbar/Searchbar";
 import { getApiData } from "../utils/Api";
@@ -7,51 +7,52 @@ import Modal from "./modal/Modal";
 import Loader from "react-loader-spinner";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 
-class App extends Component {
-  state = {
-    name: "",
-    imgList: [],
-    page: 1,
-    loader: false,
-    isModalOpen: false,
-    modalImg: "",
+const initialState = {
+  name: "",
+  imgList: [],
+  page: 1,
+  loader: false,
+  isModalOpen: false,
+  modalImg: "",
+}
+
+const App = () => {
+  const [state, setState] = useState({ ...initialState });
+
+  const onModalOpen = (modalImg) => {
+    setState((prev) => ({...prev, isModalOpen: true, modalImg: modalImg }));
   };
 
-  onModalOpen = (modalImg) => {
-    this.setState({ isModalOpen: true, modalImg: modalImg });
-    console.log(modalImg);
-  };
-
-  onModalClose = (e) => {
+  const onModalClose = (e) => {
     if (e.code !== "Escape") {
       return;
     }
-    this.setState({ isModalOpen: false, modalImg: "" });
+    setState((prev) => ({...prev, isModalOpen: false, modalImg: "" }));
   };
 
-  onSubmit = (q) => {
+  const onSubmit = (q) => {
     if (this.state.name !== q) {
-      this.setState({ imgList: [], name: q });
+      setState((prev) => ({ imgList: [], name: q }));
     }
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.name !== prevState.name && this.state.name !== "") {
-      this.setState({ loader: true });
-      getApiData(this.state.name, this.state.page)
+  useEffect((prev) => {
+    if (state.name !== prev.name && state.name !== "") {
+      setState((prev) => ({...prev, loader: true }));
+      getApiData(state.name, state.page)
         .then((images) =>
-          this.setState((prev) => ({ imgList: [...prev.imgList, ...images] }))
+          setState((prev) => ({...prev, imgList: [...prev.imgList, ...images] }))
         )
         .finally(() => {
-          this.setState({ loader: false });
+          setState((prev) => ({...prev, loader: false }));
         });
     }
 
-    if (this.state.page !== prevState.page) {
-      this.setState({ loader: true });
-      getApiData(this.state.name, this.state.page)
+    if (state.page !== prev.page) {
+      setState((prev) => ({...prev, loader: true }));
+      getApiData(state.name, state.page)
         .then((images) =>
-          this.setState((prev) => ({
+          setState((prev) => ({...prev,
             imgList: [...prev.imgList, ...images],
             loader: false,
           }))
@@ -63,33 +64,62 @@ class App extends Component {
           });
         });
     }
-  }
+  }, [state])
 
-  onLoadMore = () => {
-    this.setState((prev) => ({
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.state.name !== prevState.name && this.state.name !== "") {
+  //     this.setState({ loader: true });
+  //     getApiData(this.state.name, this.state.page)
+  //       .then((images) =>
+  //         this.setState((prev) => ({ imgList: [...prev.imgList, ...images] }))
+  //       )
+  //       .finally(() => {
+  //         this.setState({ loader: false });
+  //       });
+  //   }
+
+  //   if (this.state.page !== prevState.page) {
+  //     this.setState({ loader: true });
+  //     getApiData(this.state.name, this.state.page)
+  //       .then((images) =>
+  //         this.setState((prev) => ({
+  //           imgList: [...prev.imgList, ...images],
+  //           loader: false,
+  //         }))
+  //       )
+  //       .finally(() => {
+  //         window.scrollTo({
+  //           top: document.documentElement.scrollHeight,
+  //           behavior: "smooth",
+  //         });
+  //       });
+  //   }
+  // }
+
+  const onLoadMore = () => {
+    setState((prev) => ({...prev,
       page: prev.page + 1,
     }));
   };
 
-  render() {
     return (
       <>
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={onSubmit} />
         <ImageGallery
-          imgList={this.state.imgList}
-          onModalOpen={this.onModalOpen}
+          imgList={state.imgList}
+          onModalOpen={onModalOpen}
         />
-        {this.state.imgList.length > 0 && (
-          <Button onLoadMore={this.onLoadMore} />
+        {state.imgList.length > 0 && (
+          <Button onLoadMore={onLoadMore} />
         )}
-        {this.state.isModalOpen && (
+        {state.isModalOpen && (
           <Modal
-            modalImg={this.state.modalImg}
-            onModalClose={this.onModalClose}
+            modalImg={state.modalImg}
+            onModalClose={onModalClose}
           />
         )}
 
-        {this.state.loader && (
+        {state.loader && (
           <Loader
             type="Puff"
             color="#001aff"
@@ -101,7 +131,6 @@ class App extends Component {
         )}
       </>
     );
-  }
 }
 
 export default App;

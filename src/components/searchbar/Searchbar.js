@@ -1,46 +1,41 @@
-import React, { Component } from 'react';
+import React, { useState } from "react";
 import {
-    searchbar,
+  searchbar,
   searchForm,
   searchForm_button,
   searchForm_button_label,
   searchForm_input,
 } from "./Searchbar.module.css";
 
-class Searchbar extends Component {
-    state = {
-        name: "",
-    }
+const Searchbar = ({ onSubmit }) => {
+  const [state, setState] = useState("");
 
-    onInputChange = (e) => {
-        this.setState({ name: e.target.value })
-        console.log(this.state.name)
-    };
+  const onInputChange = (e) => {
+    setState(e.target.value);
+  };
 
-    onHandleSubmit = (e) => {
-        e.preventDefault();
-        this.props.onSubmit(this.state.name)
-        this.setState({name: ""})
-    }
+  const onHandleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(state);
+    setState("");
+  };
 
-    render() {
-        return (
-          <header className={searchbar}>
-            <form onSubmit={this.onHandleSubmit} className={searchForm}>
-              <button type="submit" className={searchForm_button}>
-                <span className={searchForm_button_label}></span>
-              </button>
+  return (
+    <header className={searchbar}>
+      <form onSubmit={onHandleSubmit} className={searchForm}>
+        <button type="submit" className={searchForm_button}>
+          <span className={searchForm_button_label}></span>
+        </button>
 
-              <input
-                type="text"
-                onChange={this.onInputChange}
-                value={this.state.name}
-                className={searchForm_input}
-              />
-            </form>
-          </header>
-        );
-    }
-}
+        <input
+          type="text"
+          onChange={onInputChange}
+          value={state}
+          className={searchForm_input}
+        />
+      </form>
+    </header>
+  );
+};
 
 export default Searchbar;
