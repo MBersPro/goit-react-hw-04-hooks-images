@@ -1,12 +1,15 @@
-const KEY = "23653781-213be0db305102de1ebeb2694";
+import axios from 'axios'
 
-export const getApiData = (q, page) => {
-  return fetch(
-    `https://pixabay.com/api/?q=${q}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`
+const KEY = "556f14b728be48318f67557804f209a7";
+// `https://pixabay.com/api/?q=${q}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`
+export  const getApiData = (q, page) => {
+  return axios(
+    
+    `https://newsapi.org/v2/everything?q=${q}&apiKey=${KEY}&page=${page}`
   )
-    .then((response) => response.json())
-    .then((response) => response.hits)
+    // .then((response) => response())
     .then((response) => {
-      return response;
+      return response.data.articles
     });
+    
 };

@@ -17,7 +17,7 @@ const initialState = {
 }
 
 const App = () => {
-  const [state, setState] = useState({ ...initialState });
+  const [newState, setState] = useState(initialState);
 
   const onModalOpen = (modalImg) => {
     setState((prev) => ({...prev, isModalOpen: true, modalImg: modalImg }));
@@ -31,28 +31,18 @@ const App = () => {
   };
 
   const onSubmit = (q) => {
-    if (this.state.name !== q) {
-      setState((prev) => ({ imgList: [], name: q }));
+    if (newState.name !== q) {
+      setState((prev) => ({ imgList: [], name: q, page: 1 }));
     }
   };
 
-  useEffect((prev) => {
-    if (state.name !== prev.name && state.name !== "") {
-      setState((prev) => ({...prev, loader: true }));
-      getApiData(state.name, state.page)
+  useEffect(() => {
+    if (newState.name) {
+      setState((prev) => ({ ...prev, loader: true }));
+      getApiData(newState.name, newState.page)
         .then((images) =>
-          setState((prev) => ({...prev, imgList: [...prev.imgList, ...images] }))
-        )
-        .finally(() => {
-          setState((prev) => ({...prev, loader: false }));
-        });
-    }
-
-    if (state.page !== prev.page) {
-      setState((prev) => ({...prev, loader: true }));
-      getApiData(state.name, state.page)
-        .then((images) =>
-          setState((prev) => ({...prev,
+          setState((prev) => ({
+            ...prev,
             imgList: [...prev.imgList, ...images],
             loader: false,
           }))
@@ -64,37 +54,7 @@ const App = () => {
           });
         });
     }
-  }, [state])
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.state.name !== prevState.name && this.state.name !== "") {
-  //     this.setState({ loader: true });
-  //     getApiData(this.state.name, this.state.page)
-  //       .then((images) =>
-  //         this.setState((prev) => ({ imgList: [...prev.imgList, ...images] }))
-  //       )
-  //       .finally(() => {
-  //         this.setState({ loader: false });
-  //       });
-  //   }
-
-  //   if (this.state.page !== prevState.page) {
-  //     this.setState({ loader: true });
-  //     getApiData(this.state.name, this.state.page)
-  //       .then((images) =>
-  //         this.setState((prev) => ({
-  //           imgList: [...prev.imgList, ...images],
-  //           loader: false,
-  //         }))
-  //       )
-  //       .finally(() => {
-  //         window.scrollTo({
-  //           top: document.documentElement.scrollHeight,
-  //           behavior: "smooth",
-  //         });
-  //       });
-  //   }
-  // }
+  }, [newState.name, newState.page])
 
   const onLoadMore = () => {
     setState((prev) => ({...prev,
@@ -105,21 +65,13 @@ const App = () => {
     return (
       <>
         <Searchbar onSubmit={onSubmit} />
-        <ImageGallery
-          imgList={state.imgList}
-          onModalOpen={onModalOpen}
-        />
-        {state.imgList.length > 0 && (
-          <Button onLoadMore={onLoadMore} />
-        )}
-        {state.isModalOpen && (
-          <Modal
-            modalImg={state.modalImg}
-            onModalClose={onModalClose}
-          />
+        <ImageGallery imgList={newState.imgList} onModalOpen={onModalOpen} />
+        {newState.imgList.length > 0 && <Button onLoadMore={onLoadMore} />}
+        {newState.isModalOpen && (
+          <Modal modalImg={newState.modalImg} onModalClose={onModalClose} />
         )}
 
-        {state.loader && (
+        {newState.loader && (
           <Loader
             type="Puff"
             color="#001aff"
